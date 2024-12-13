@@ -2,7 +2,7 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-/.idea
+.idea
 peersim-1.0.5
 ### Eclipse ###
 .apt_generated
