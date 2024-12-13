@@ -2,12 +2,8 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
-
+/.idea
+peersim-1.0.5
 ### Eclipse ###
 .apt_generated
 .classpath
