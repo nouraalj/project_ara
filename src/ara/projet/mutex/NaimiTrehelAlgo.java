@@ -37,7 +37,10 @@ public class NaimiTrehelAlgo implements EDProtocol {
 	public static enum State {
 		tranquil, requesting, inCS
 	}
-
+	// etats possibles du token dans l'application
+	public static enum TokenState {
+		used, transit, not_used
+	}
 	// paramètres de l'algorithme lus depuis le fichier de configuration
 	protected final long timeCS;
 	protected final long timeBetweenCS;
@@ -71,14 +74,17 @@ public class NaimiTrehelAlgo implements EDProtocol {
 								// peut être incrémenté dans les sous-classes)
 
 	// variables de statistiques pour les métriques
-	protected  int nb_request_per_node = 0; // Nombre de fois qu'un noeud a demandé l'accés à la section critique
+	protected  int nb_request= 0; // Nombre de fois que le noeud a demandé l'accés à la section critique
 	public static Map<Integer, Integer> nb_messApp_per_cs = new HashMap<>(); // Nombre de requete par SC
 	protected long request_time = -1; // Temps passé dans l'état requesting
 
-	protected long timeInU = 0;  // Temps total passé par le jeton dans l'état "Utilisé"
-	protected long timeInT = 0;  // Temps total passé par le jeton dans l'état "Transit"
-	protected long timeInN = 0;  // Temps total passé par le jeton dans l'état "Non utilisé"
-	protected long lastTransitionTime = 0; // Heure de la dernière transition d'état
+	// variables globales pour les temps passé dans un des états du jeton :
+	protected long timeInU = 0;  // temps total passé par le jeton dans l'état "Utilisé"
+	protected long timeInT = 0;  // temps total passé par le jeton dans l'état "Transit"
+	protected long timeInN = 0;  // temps total passé par le jeton dans l'état "Non utilisé"
+	public static TokenState globalTokenState = TokenState.not_used; // etat du jeton initialement
+
+	protected long lastTokenStateChange = 0; // variable stockant l'heure de la dernière transition du jeton
 
 	// private static BufferedWriter logWriter; 	// Writer pour écrire les logs dans un fichier
 	// static {
@@ -132,7 +138,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 					this.releaseCS(node);
 					break;
 				case request_cs:
-					nb_request_per_node++;
+					nb_request++;
 					this.requestCS(node);
 					break;
 				default:
@@ -165,6 +171,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 	/////////////////////////////////////////// METHODES DE
 	/////////////////////////////////////////// L'ALGORITHME////////////////////////////////////////////
 	private void executeCS(Node host) {
+		changeTokenState(TokenState.used); // token etat utilise
 		log.info("Node " + host.getID() + " executing its CS num " + nb_cs + " : next= " + next.toString());
 		global_counter++;
 		log.info("Node " + host.getID() + " global counter = " + global_counter);
@@ -212,6 +219,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 					+ dest.getID());
 			tr.send(host, dest, new TokenMessage(host.getID(), dest.getID(), protocol_id, new ArrayDeque<Long>(next),
 					global_counter), protocol_id);
+			changeTokenState(TokenState.transit);
 			next.clear();
 		}
 	}
@@ -229,6 +237,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 						+ ") to " + dest.getID() + " (no need)");
 				tr.send(host, dest, new TokenMessage(host.getID(), dest.getID(), protocol_id, new ArrayDeque<Long>(),
 						global_counter), protocol_id);
+				changeTokenState(TokenState.transit);
 				last = requester;
 			}
 		} else {
@@ -250,7 +259,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 	/////////////////////////////////////////// METHODES
 	/////////////////////////////////////////// UTILITAIRES////////////////////////////////////////////
 	protected void changestate(Node host, State s) {
-		// calcul des durées pour l'état courant :
+		/* calcul des durées pour l'état courant :
 		long currentTime = CommonState.getTime();
 		long duration = currentTime - lastTransitionTime;
 		switch (state){
@@ -264,7 +273,7 @@ public class NaimiTrehelAlgo implements EDProtocol {
 				timeInN += duration;
 				break;
 		}
-		lastTransitionTime = CommonState.getTime();
+		lastTransitionTime = CommonState.getTime();*/
 		this.state = s;
 		switch (this.state) {
 		case inCS:
@@ -272,10 +281,33 @@ public class NaimiTrehelAlgo implements EDProtocol {
 			schedule_release(host);
 			break;
 		case tranquil:
+			changeTokenState(TokenState.not_used);
 			schedule_request(host);
 			break;
 		default:
 		}
+	}
+
+	private void changeTokenState(TokenState newState) {
+		long currentTime = CommonState.getTime();
+		long elapsedTime = currentTime - lastTokenStateChange;
+
+		// Ajouter le temps écoulé à l'état actuel
+		switch (globalTokenState) {
+			case used:
+				timeInU += elapsedTime;
+				break;
+			case transit:
+				timeInT += elapsedTime;
+				break;
+			case not_used:
+				timeInN += elapsedTime;
+				break;
+		}
+
+		// Mettre à jour l'état et le moment du dernier changement
+		globalTokenState = newState;
+		lastTokenStateChange = currentTime;
 	}
 
 	private static long getLast(Queue<Long> q) {
@@ -342,12 +374,14 @@ public class NaimiTrehelAlgo implements EDProtocol {
 	/////////////////////////////////////////// METHODES POUR LES
 	/////////////////////////////////////////// STATISTIQUES ////////////////////////////////////////////
 
+
+
 	public int getNbCs(){
 		return nb_cs;
 	}
 
 	public int getNbRequest() {
-		return nb_request_per_node;
+		return nb_request;
 	}
 
 	public long getRequest_time() {

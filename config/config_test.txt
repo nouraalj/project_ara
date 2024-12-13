@@ -1,4 +1,4 @@
-network.size 5
+network.size 10
 simulation.endtime 10000
 random.seed 20
 
@@ -8,7 +8,7 @@ protocol.transport.maxdelay 30
 
 protocol.naimitrehel NaimiTrehelAlgo
 protocol.naimitrehel.transport transport
-protocol.naimitrehel.timeCS 100 # alpha
+protocol.naimitrehel.timeCS 250 # alpha
 protocol.naimitrehel.timeBetweenCS 50 # beta
 
 init.i Initialisateur
@@ -17,6 +17,6 @@ init.i.protoNTpid naimitrehel
 control.statscollector StatsCollector
 control.statscollector.at -1
 control.statscollector.FINAL
-control.statscollector.proto naimitrehel
+control.statscollector.protoNT naimitrehel
 
 
