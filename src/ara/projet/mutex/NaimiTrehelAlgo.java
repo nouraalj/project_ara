@@ -20,7 +20,7 @@ import peersim.transport.Transport;
 
 public class NaimiTrehelAlgo implements EDProtocol {
 
-	// Nom des arguments du fichiers de configuration
+	// Nom des arguments des fichiers de configuration
 	private static final String PAR_TRANSPORT = "transport";
 	private static final String PAR_TIME_CS = "timeCS";
 	private static final String PAR_TIME_BETWEEN_CS = "timeBetweenCS";
@@ -75,7 +75,9 @@ public class NaimiTrehelAlgo implements EDProtocol {
 
 	// variables de statistiques pour les métriques
 	protected  int nb_request= 0; // Nombre de fois que le noeud a demandé l'accés à la section critique
-	public static Map<Integer, Integer> nb_messApp_per_cs = new HashMap<>(); // Nombre de requete par SC
+	public static Map<Integer, Integer> nb_messToken_per_cs = new HashMap<>(); // Nombre de message token par SC
+	public static Map<Integer, Integer> nb_messRequest_per_cs = new HashMap<>(); // Nombre de message requete par SC
+
 	protected long request_time = -1; // Temps passé dans l'état requesting
 
 	// variables globales pour les temps passé dans un des états du jeton :
@@ -152,11 +154,11 @@ public class NaimiTrehelAlgo implements EDProtocol {
 			if (m instanceof RequestMessage) {
 				RequestMessage rm = (RequestMessage) m;
 				this.receive_request(node, m.getIdSrc(), rm.getRequester());
-				nb_messApp_per_cs.put(nb_cs, nb_messApp_per_cs.getOrDefault(nb_cs, 0) + 1);
+				nb_messRequest_per_cs.put(nb_cs, nb_messRequest_per_cs.getOrDefault(nb_cs, 0) + 1);
 			} else if (m instanceof TokenMessage) {
 				TokenMessage tm = (TokenMessage) m;
 				this.receive_token(node, tm.getIdSrc(), tm.getNext(), tm.getCounter());
-				nb_messApp_per_cs.put(nb_cs, nb_messApp_per_cs.getOrDefault(nb_cs, 0) + 1);
+				nb_messToken_per_cs.put(nb_cs, nb_messToken_per_cs.getOrDefault(nb_cs, 0) + 1);
 			} else {
 				throw new RuntimeException("Receive unknown type Message");
 			}
@@ -399,9 +401,9 @@ public class NaimiTrehelAlgo implements EDProtocol {
 		return timeInN;
 	}
 
-	public List<Integer> getNbMsgPerCS(){
-		return new ArrayList<Integer>(nb_messApp_per_cs.values());
+	public List<Integer> getNbMsgRequestPerCS(){
+		return new ArrayList<Integer>(nb_messRequest_per_cs.values());
 	}
-
+	public List<Integer> getNbMsgTokenPerCS(){return new ArrayList<Integer>(nb_messToken_per_cs.values());}
 
 }

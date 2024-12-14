@@ -10,7 +10,7 @@ protocol.transport.maxdelay 130
 protocol.naimitrehel ara.projet.mutex.NaimiTrehelAlgo
 protocol.naimitrehel.transport transport
 protocol.naimitrehel.timeCS 10 # alpha
-protocol.naimitrehel.timeBetweenCS 90 # beta
+protocol.naimitrehel.timeBetweenCS 150 # beta
 
 init.i ara.util.Initialisateur
 init.i.protoNTpid naimitrehel
@@ -20,5 +20,5 @@ control.statscollector.at -1
 control.statscollector.FINAL
 control.statscollector.outputFile metrics.txt
 control.statscollector.proto naimitrehel
-control.statscollector.beta 90
+control.statscollector.beta 150
 control.statscollector.case case3
