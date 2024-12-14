@@ -35,6 +35,7 @@ public class StatsCollector implements Control {
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
             if (new java.io.File(filename).length() == 0) {
                 bw.write("Case,Beta,NodeId,AppMessagesPerCS,MessagesRequestPerNode,AverageWaitingTime,TimeU,TimeT,TimeN\n");
+                bw.flush();
             }
 
             Node node = Network.get(0);
@@ -50,7 +51,7 @@ public class StatsCollector implements Control {
                 int nb_request = nTpro.getNbRequest();
                 double nbAppMsgPerCS = (double) nTpro.getNbMsgPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
                 double avgWaitingTime = (double) nTpro.getRequest_time() / nb_request;
-                bw.write(String.format("%s,%d,%d,%.2f,%d,%.2f,%.2f,%.2f,%.2f\n",
+                bw.write(String.format("%s;%d;%d;%.2f;%d;%.2f;%.2f;%.2f;%.2f\n",
                         cases,
                         beta,
                         n.getID(),
