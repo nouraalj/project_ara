@@ -10,36 +10,36 @@ metrics_file = "metrics.txt"
 
 src_dir = "./src"
 classpath = (
-    "./out/production/project_ara:" # répertoire contenant les .class
+    "./out/production/project_ara:" # Répertoire contenant les .class
     "./:./peersim-1.0.5/peersim-1.0.5.jar:"
     "./peersim-1.0.5/jep-2.3.0.jar:./peersim-1.0.5/djep-1.0.0.jar"
 ) # à modifier selon le chemin vers les jar peerSim et les fichiers class
 
-# valeurs des paramètres pour chacun des cas étudiés
+# Valeurs des paramètres pour chacun des cas étudiés
 cases = {
-    "case1": {"gamma_min": 10, "gamma_max": 30, "alpha": 250},
-    "case2": {"gamma_min": 50, "gamma_max": 100, "alpha": 250},
-    "case3": {"gamma_min": 300, "gamma_max": 500, "alpha": 250},
+    "case1": {"gamma_min": 10, "gamma_max": 30, "alpha": 500},
+    "case2": {"gamma_min": 200, "gamma_max": 250, "alpha": 250},
+    "case3": {"gamma_min": 500, "gamma_max": 550, "alpha": 20},
 }
 beta_min = 10
 beta_max = 100
 step = 10
 
-# mise en place des directories pour la configuration
+# Mise en place des directories pour la configuration
 for case, dir_path in output_dirs.items():
     if os.path.exists(dir_path):
-        # effacer les fichiers de configs existants :
+        # Effacer les fichiers de configs existants :
         for file in os.listdir(dir_path):
             os.remove(os.path.join(dir_path, file))
     else:
         os.makedirs(dir_path, exist_ok=True)
 
-# si le fichier metrics existe, effacer son contenu
+# Si le fichier metrics existe, effacer son contenu
 if os.path.exists(metrics_file):
     with open(metrics_file, "w") as f:
         f.truncate(0)
 
-# Configuration template
+# Template du fichier de configuration
 template = """
 network.size 10
 simulation.endtime 10000
@@ -66,7 +66,7 @@ control.statscollector.beta {beta}
 control.statscollector.case {case}
 """
 
-# generer les fichiers de config
+# Generer les fichiers de config à partir du template
 for case, params in cases.items():
     for beta in range(beta_min, beta_max + step, step):
         dir_path = output_dirs[case]
@@ -82,7 +82,7 @@ for case, params in cases.items():
             f.write(config_content)
         # print(f"Generated: {config_filename}")
 
-# executer les simulations
+# Executer les simulations pour chacun des cas et des fichiers de configuration correspondants
 for case, dir_path in output_dirs.items():
     for config_file in sorted(os.listdir(dir_path)):
         config_path = os.path.join(dir_path, config_file)
