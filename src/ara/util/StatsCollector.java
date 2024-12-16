@@ -47,7 +47,7 @@ public class StatsCollector implements Control {
     public boolean execute() {
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
             if (new java.io.File(filename).length() == 0) {
-                bw.write("Case;Alpha;Gamma;Beta;NodeId;TokenMessagesPerCS;RequestMessagePerCs;MessagesRequestPerNode;AverageWaitingTime;TimeU;TimeT;TimeN\n");
+                bw.write("Case;Alpha;Gamma;Beta;NodeId;AppMessagesPerCS;MessagesRequestPerNode;AverageWaitingTime;TimeU;TimeT;TimeN\n");
                 bw.flush();
             }
 
@@ -62,17 +62,17 @@ public class StatsCollector implements Control {
                 Node n= Network.get(i);
                 NaimiTrehelAlgo nTpro = (NaimiTrehelAlgo) n.getProtocol(protoNTpid);
                 int nb_request = nTpro.getNbRequest();
-                double nbMsgTokenPerCS = (double) nTpro.getNbMsgTokenPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
-                double nbMsgRequestPerCS = (double) nTpro.getNbMsgRequestPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
+                //double nbMsgTokenPerCS = (double) nTpro.getNbMsgTokenPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
+                //double nbMsgRequestPerCS = (double) nTpro.getNbMsgRequestPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
+                double nbAppMsgPerCS = (double) nTpro.getNbMsgPerCS().stream().mapToInt(Integer::intValue).sum() / nTpro.getNbCs();
                 double avgWaitingTime = (double) nTpro.getRequest_time() / nb_request;
-                bw.write(String.format(Locale.US,"%s;%d;%d;%d;%d;%.2f;%.2f;%d;%.2f;%.2f;%.2f;%.2f\n",
+                bw.write(String.format(Locale.US,"%s;%d;%d;%d;%d;%.2f;%d;%.2f;%.2f;%.2f;%.2f\n",
                         cases,
                         alpha,
                         gamma,
                         beta,
                         n.getID(),
-                        nbMsgTokenPerCS,
-                        nbMsgRequestPerCS,
+                        nbAppMsgPerCS,
                         nb_request,
                         avgWaitingTime,
                         percentU,

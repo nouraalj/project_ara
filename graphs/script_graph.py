@@ -9,7 +9,26 @@ case_descriptions = {
     "case3": "γ >> α",
 }
 
-# Messages applicatifs par Section Critique (on le fait pour chaque cas séparément):
+# Messages applicatifs par Section Critique :
+df = pd.read_csv("../metrics.txt", sep=";")
+groupedbycase = df.groupby(['Case', 'Beta']).mean().reset_index()
+plt.figure(figsize=(10, 6))
+for case in groupedbycase['Case'].unique():
+    subset = groupedbycase[groupedbycase['Case'] == case]
+    plt.plot(subset['Beta'], subset['AppMessagesPerCS'], label=f"{case} {case_descriptions[case]}")
+# Titre et légendes
+plt.title("Messages Applicatifs par Section Critique")
+plt.xlabel("Beta (ms)")
+plt.ylabel("Nombre de messages applicatifs")
+plt.legend()
+plt.grid(True)
+# à décommenter si on veut afficher le graphique
+#plt.show()
+plt.savefig("./outputs/MessagesApplicatifsParCS.png")
+
+
+
+""" Messages applicatifs par Section Critique (on le fait pour chaque cas séparément):
 
 df = pd.read_csv("../metrics.txt", sep=";")
 groupedbycase = df.groupby(['Case', 'Beta']).mean().reset_index()
@@ -38,7 +57,7 @@ for case in groupedbycase['Case'].unique():
     plt.tight_layout()
     plt.savefig(f"./outputs/MessagesPerCS_{case}.png")
     plt.close()
-
+"""
 # Nombre de messages request par noeud :
 plt.figure(figsize=(10, 6))
 for case in groupedbycase['Case'].unique():
@@ -96,7 +115,7 @@ for case in groupedbycase['Case'].unique():
     for i, state in enumerate(states):
         plt.bar(
             subset['Beta'], subset[state], label=f"{state_labels[i]}",
-            bottom=bottom, width=3
+            bottom=bottom, width=8
         )
         bottom = subset[state] if bottom is None else bottom + subset[state]
 

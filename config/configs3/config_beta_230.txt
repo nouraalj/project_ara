@@ -1,15 +1,15 @@
 
 network.size 10
-simulation.endtime 1000
-random.seed 40
+simulation.endtime 10000
+random.seed 5
 
 protocol.transport UniformRandomTransport
-protocol.transport.mindelay 50 # gamma
-protocol.transport.maxdelay 130
+protocol.transport.mindelay 100 # gamma
+protocol.transport.maxdelay 190
 
 protocol.naimitrehel ara.projet.mutex.NaimiTrehelAlgo
 protocol.naimitrehel.transport transport
-protocol.naimitrehel.timeCS 10 # alpha
+protocol.naimitrehel.timeCS 5 # alpha
 protocol.naimitrehel.timeBetweenCS 230 # beta
 
 init.i ara.util.Initialisateur

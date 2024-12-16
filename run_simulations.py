@@ -17,9 +17,9 @@ classpath = (
 
 # Valeurs des paramètres pour chacun des cas étudiés
 cases = {
-    "case1": {"gamma_min":20, "gamma_max": 30, "alpha": 75},
-    "case2": {"gamma_min": 20, "gamma_max": 80, "alpha": 50},
-    "case3": {"gamma_min":50, "gamma_max": 130, "alpha": 10},
+    "case1": {"gamma_min":1, "gamma_max": 9, "alpha": 145},
+    "case2": {"gamma_min": 50, "gamma_max": 100, "alpha": 75},
+    "case3": {"gamma_min":100, "gamma_max": 190, "alpha": 5},
 }
 beta_min = 10
 beta_max = 300
@@ -42,8 +42,8 @@ if os.path.exists(metrics_file):
 # Template du fichier de configuration
 template = """
 network.size 10
-simulation.endtime 1000
-random.seed 40
+simulation.endtime 10000
+random.seed 5
 
 protocol.transport UniformRandomTransport
 protocol.transport.mindelay {gamma_min} # gamma
