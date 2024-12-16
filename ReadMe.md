@@ -25,13 +25,13 @@ Les résultats de cette étude seront illustrés sous forme de graphiques.
 
 > [!CAUTION] 
 > Dans la variable `classpath` du script `run_simulations.py` : 
-> Modifier les chemins du `classpath` si nécessaire pour pointer vers le répertoire contenant vos fichiers .class
+> Modifier les chemins du `classpath` si nécessaire pour pointer vers le répertoire contenant vos fichiers .class.
 > Modifier également les chemins vers les JAR du répertoire `peersim-1.0.5̀` s'il n'est pas à la racine du projet.
 
 ### 2. Exécution des simulations
 Lancer les simulations avec le script Python :
 ```bash 
-   python run_simulations.py
+python run_simulations.py
 ```
 Ce script génère des fichiers de configurations dans `/configs` et les utilise pour les simulations.
 À l'aide du module de contrôle `StatsCollector`, les données récoltées à chaque fin de simulation sont écrites dans le fichier `metrics.txt`
@@ -39,6 +39,6 @@ Ce script génère des fichiers de configurations dans `/configs` et les utilise
 3. Visualisation des métriques
 Lancer le script qui génère les graphiques pour chaque métrique :
 ```bash 
-   python graphs/run_simulations.py
+python graphs/run_simulations.py
 ```
 Les graphiques sont placés dans `graphs/outputs`.
