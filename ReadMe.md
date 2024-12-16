@@ -20,7 +20,7 @@ Les résultats de cette étude seront illustrés sous forme de graphiques.
 * Avec un IDE tel qu'Eclipse, IntelliJ, VScode, la compilation est soit faite de manière automatique, ou à l'aide d'une commande `Build Project` intégrée.
 * Pour une compilation manuelle, exécuter à la racine du projet :
 ```bash
-   javac -d out -cp ./peersim-1.0.5/peersim-1.0.5.jar src/**/*.java
+javac -d out -cp ./peersim-1.0.5/peersim-1.0.5.jar src/**/*.java
 ```
 
 > [!CAUTION] 
