@@ -36,7 +36,7 @@ python run_simulations.py
 Ce script génère des fichiers de configurations dans `/configs` et les utilise pour les simulations.
 À l'aide du module de contrôle `StatsCollector`, les données récoltées à chaque fin de simulation sont écrites dans le fichier `metrics.txt`
 
-3. Visualisation des métriques
+### 3. Visualisation des métriques
 Lancer le script qui génère les graphiques pour chaque métrique :
 ```bash 
 python graphs/run_simulations.py

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 output_dirs = {
     "case1": "./config/configs1",
@@ -8,22 +9,24 @@ output_dirs = {
 }
 metrics_file = "metrics.txt"
 
+jar_file = sys.argv[1]
+
 src_dir = "./src"
 classpath = (
-    "./out/production/project_ara:" # Répertoire contenant les .class
+    "../out/production/project_arav2:"
     "./:./peersim-1.0.5/peersim-1.0.5.jar:"
     "./peersim-1.0.5/jep-2.3.0.jar:./peersim-1.0.5/djep-1.0.0.jar"
 ) # à modifier selon le chemin vers les jar peerSim et les fichiers class
 
 # Valeurs des paramètres pour chacun des cas étudiés
 cases = {
-    "case1": {"gamma_min":1, "gamma_max": 9, "alpha": 145},
-    "case2": {"gamma_min": 50, "gamma_max": 100, "alpha": 75},
-    "case3": {"gamma_min":100, "gamma_max": 190, "alpha": 5},
+    "case1": {"gamma_min":1, "gamma_max":1, "alpha": 99},
+    "case2": {"gamma_min": 50, "gamma_max": 50, "alpha": 50},
+    "case3": {"gamma_min":80, "gamma_max": 80, "alpha": 20},
 }
-beta_min = 10
-beta_max = 300
-step = 20
+beta_min = 1
+beta_max = 5000
+step = 200
 
 # Mise en place des directories pour la configuration
 for case, dir_path in output_dirs.items():
@@ -41,9 +44,9 @@ if os.path.exists(metrics_file):
 
 # Template du fichier de configuration
 template = """
-network.size 10
-simulation.endtime 10000
-random.seed 5
+network.size 30
+simulation.endtime 1000000000
+random.seed 20
 
 protocol.transport UniformRandomTransport
 protocol.transport.mindelay {gamma_min} # gamma
@@ -53,9 +56,6 @@ protocol.naimitrehel ara.projet.mutex.NaimiTrehelAlgo
 protocol.naimitrehel.transport transport
 protocol.naimitrehel.timeCS {alpha} # alpha
 protocol.naimitrehel.timeBetweenCS {beta} # beta
-
-init.i ara.util.Initialisateur
-init.i.protoNTpid naimitrehel
 
 control.statscollector ara.util.StatsCollector
 control.statscollector.at -1
@@ -69,6 +69,7 @@ control.statscollector.case {case}
 # Generer les fichiers de config à partir du template
 for case, params in cases.items():
     for beta in range(beta_min, beta_max + step, step):
+        #for beta in []:
         dir_path = output_dirs[case]
         config_content = template.format(
             gamma_min=params["gamma_min"],
@@ -87,4 +88,4 @@ for case, dir_path in output_dirs.items():
     for config_file in sorted(os.listdir(dir_path)):
         config_path = os.path.join(dir_path, config_file)
         print(f"Running simulation for: {config_path}")
-        subprocess.run(["java", "-cp", classpath, "peersim.Simulator", config_path])
+        subprocess.run(["java", "-jar", jar_file, config_path],stderr=subprocess.STDOUT,check=True)

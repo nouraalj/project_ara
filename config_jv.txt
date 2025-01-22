@@ -1,0 +1,33 @@
+network.size 5
+simulation.experiment 1
+simulation.endtime 200000
+random.seed 42
+
+protocol.transport UniformRandomTransport
+protocol.transport.mindelay 10 # gamma (à augmenter ?)
+protocol.transport.maxdelay 10
+
+protocol.fifotransport FIFOTransport
+protocol.fifotransport.transport transport
+
+protocol.juang JuangVenkatesanAlgo
+protocol.juang.transport fifotransport
+protocol.juang.checkpointable naimitrehel
+protocol.juang.timecheckpointing 400
+
+protocol.naimitrehel NaimiTrehelAlgoCheckpointable
+protocol.naimitrehel.transport juang
+protocol.naimitrehel.timeCS 100 #alpha
+protocol.naimitrehel.timeBetweenCS 2450 #beta
+
+init.i Initialisateur
+init.i.protoNTpid naimitrehel
+
+control.crash CrashControler
+control.crash.from 100000
+control.crash.step 100000
+control.crash.faulty_nodes 4
+control.crash.probacrash 1
+control.crash.checkpointer juang
+
+loglevel FINE
