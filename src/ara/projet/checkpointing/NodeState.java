@@ -1,10 +1,11 @@
 package ara.projet.checkpointing;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class NodeState {
+public class NodeState implements Serializable {
 
 	private Map<String, Object> map = new HashMap<>();
 	

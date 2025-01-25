@@ -29,16 +29,22 @@ javac -d out -cp ./peersim-1.0.5/peersim-1.0.5.jar src/**/*.java
 > Modifier également les chemins vers les JAR du répertoire `peersim-1.0.5̀` s'il n'est pas à la racine du projet.
 
 ### 2. Exécution des simulations
-Lancer les simulations avec le script Python :
+Lancer les simulations avec les scripts Python et le jar crée en argument :
+* `run_simulations.py` pour l'étude expérimentale 1 sur l'algorithme d'exclusion mutuelle distribuée
+* `run_simulations_2.py` pour l'étude expérimentale 2 sur l'algorithme de recouvrement
+
 ```bash 
-python run_simulations.py
+python run_simulations.py project.jar
+python run_simulations2.py project.jar
+
 ```
 Ce script génère des fichiers de configurations dans `/configs` et les utilise pour les simulations.
 À l'aide du module de contrôle `StatsCollector`, les données récoltées à chaque fin de simulation sont écrites dans le fichier `metrics.txt`
 
 ### 3. Visualisation des métriques
-Lancer le script qui génère les graphiques pour chaque métrique :
+Lancer le script qui génère les graphiques pour chaque étude :
 ```bash 
-python graphs/run_simulations.py
+python graphs/script_graph.py
+python graphs/script_graph2.py
 ```
 Les graphiques sont placés dans `graphs/outputs`.

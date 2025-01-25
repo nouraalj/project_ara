@@ -2,6 +2,9 @@ package ara.projet.checkpointing.algorithm;
 
 import static ara.util.Constantes.log;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +26,7 @@ import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 
 /**
- * 
+ *
  * @author jlejeune Version modifiée de l'algorithme de Juang Venkatesan, où on
  *         fait x broadcasts de message de rollback (= un round) pour obtenir
  *         une ligne de recouvrement cohérente. Dans la version initiale x était
@@ -53,7 +56,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 	// checkpoint
 	private Map<Long, List<WrappingMessage>> sent_messages;
 
-	// ATtributs de sauvegarde
+	// Attributs de sauvegarde
 	private Stack<NodeState> states; // etat de l'application
 	private Stack<Map<Long, Integer>> saved_sent;// nombre de message envoyés
 	private Stack<Map<Long, Integer>> saved_rcvd;// nombre de message reçus
@@ -67,6 +70,25 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 	private int nb_remaining_received_rollback = 0;
 	private List<WrappingMessage> message_to_replay_after_recovery;
 	private int nb_remaining_replyrecovery;
+
+
+
+	/* ________________________________ Metric ________________________________ */
+
+
+	public static long recouvrement_time = 0;  //  Temps moyen qu’il faut pour faire un recouvrement
+	private long start_time = 0;
+
+	public static int total_msg = 0;  // Nombre de messages pour tout les recouvrement
+
+	public static int ancien_ligne_recouvrement = 0;
+
+	public static int nbr_recouvrement = 0;  // Nombre de recouvrement
+
+	public static int total_taille = 0;
+
+	public static int nbCheckpoints = 0;
+
 
 	public JuangVenkatesanAlgo(String prefix) {
 		String tmp[] = prefix.split("\\.");
@@ -162,7 +184,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 
 	@Override
 	public void createCheckpoint(Node host) {
-
+		nbCheckpoints++;
 		Checkpointable chk = (Checkpointable) host.getProtocol(checkpointable_id);
 		NodeState ns = chk.getCurrentState();
 		states.push(ns);
@@ -170,6 +192,18 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 		saved_rcvd.push(new HashMap<>(rcvd));
 		saved_sent_messages.push(new HashMap<>(sent_messages));
 		sent_messages.clear();
+
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		try (ObjectOutputStream oos = new ObjectOutputStream(b)) {
+			oos.writeObject(ns);
+			oos.writeObject(sent);
+			oos.writeObject(rcvd);
+			oos.writeObject(sent_messages);
+			oos.flush();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		total_taille += b.size();
 
 		log.fine("Node " + host.getID() + " : saved  state (" + (states.size()) + ") " + states.peek() + " sent = "
 				+ saved_sent.peek() + " rcvd = " + saved_rcvd.peek() + " sent_messages = "
@@ -181,6 +215,9 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 
 	@Override
 	public void recover(Node host) {
+		start_time = CommonState.getTime();
+		nbr_recouvrement ++;
+
 		idround = 0;
 
 		log.fine("Node " + host.getID() + " : start recovering");
@@ -203,7 +240,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 	private void send_rollback_messages(Node host) {
 		log.fine("Node " + host.getID() + " : start round " + (idround++));
 		should_continue_rollback = false;// si ceci reste faux alors on arretra
-											// le rollback
+		// le rollback
 		Transport t = (Transport) host.getProtocol(transport);
 		for (int j = 0; j < Network.size(); j++) {
 			if (j != host.getIndex()) {
@@ -211,6 +248,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 				int nb_sent = saved_sent.peek().get(id_dest);
 				t.send(host, Network.get(j), new RollBackMessage(host.getID(), id_dest, protocol_id, nb_sent),
 						protocol_id);
+				total_msg++;
 			}
 		}
 		nb_remaining_received_ack_rollback = Network.size() - 1;
@@ -220,6 +258,8 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 		log.fine("Node " + host.getID() + " : receive RollBackMessage from " + rbmess.getIdSrc());
 		log.fine("Node " + host.getID() + " : (" + states.size() + " checkpoints)" + "  state = " + states.peek()
 				+ " sent = " + saved_sent.peek() + " rcvd = " + saved_rcvd.peek());
+
+		ancien_ligne_recouvrement += states.size();   // Ancien
 
 		nb_remaining_received_rollback--;
 		int nb_recv = saved_rcvd.peek().get(rbmess.getIdSrc());
@@ -233,6 +273,8 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 					+ "  state = " + states.peek() + " sent = " + saved_sent.peek() + " rcvd = " + saved_rcvd.peek());
 			nb_recv = saved_rcvd.peek().get(rbmess.getIdSrc());
 		}
+
+		ancien_ligne_recouvrement -= states.size(); // nouveau
 
 		if (nb_remaining_received_rollback == 0) {
 
@@ -248,6 +290,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 					t.send(host, dest,
 							new AckRollBackMessage(host.getID(), dest.getID(), protocol_id, should_continue_rollback),
 							protocol_id);
+					total_msg++;
 					log.fine("Node " + host.getID() + " : send AckRollBackMessage to " + dest.getID() + " ("
 							+ should_continue_rollback + ")");
 				}
@@ -263,14 +306,14 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 		should_continue_rollback = should_continue_rollback || mess.should_contine_rollback();
 		if (nb_remaining_received_ack_rollback == 0) {// on a recu tous les acks
 			if (should_continue_rollback) {// il y a au moins un noeud qui a
-											// fait
-											// un rollback
+				// fait
+				// un rollback
 				send_rollback_messages(host);// on refait un round du coup
 			} else {
 				findMessagesToReplay(host);// on a trouvé la ligne de
-											// recouvrement, on passe à la phase
-											// de rejeu des
-											// messages
+				// recouvrement, on passe à la phase
+				// de rejeu des
+				// messages
 			}
 		}
 	}
@@ -292,6 +335,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 			if (dest.getID() != host.getID()) {
 				t.send(host, dest, new AskMissingMessMessage(host.getID(), dest.getID(), protocol_id,
 						saved_rcvd.peek().get(dest.getID())), protocol_id);
+				total_msg++;
 			}
 
 		}
@@ -335,6 +379,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 				t.send(host, dest,
 						new ReplyAskMissingMessMessage(host.getID(), amess.getIdSrc(), protocol_id, missing_mess),
 						protocol_id);
+				total_msg++;
 				break;
 			}
 		}
@@ -350,6 +395,9 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 	}
 
 	private void stop_recover(Node host) {
+		recouvrement_time += (CommonState.getTime()-start_time);
+		start_time=0;
+
 		Checkpointable chk = (Checkpointable) host.getProtocol(checkpointable_id);
 		chk.resume();
 		is_recovery = false;
@@ -363,6 +411,7 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 		for (WrappingMessage wm : message_to_replay_after_recovery) {
 			receiveWrappingMessage(host, wm);
 		}
+
 
 	}
 
@@ -467,5 +516,24 @@ public class JuangVenkatesanAlgo implements Checkpointer, EDProtocol, Transport 
 		public String toString() {
 			return "WrappingMessage( from=" + getIdSrc() + ", to = " + getIdDest() + "  mess = " + getMessage() + ")";
 		}
+	}
+
+
+
+
+
+
+
+
+	/////////////////////////////////////////// METHODES POUR LES STATISTIQUES ////////////////////////////////////////////
+
+	public static Map<String, Double> get_metrics() {
+
+		Map<String, Double> metrics = new HashMap<>();
+		metrics.put("avg_time", (double) recouvrement_time / nbr_recouvrement);
+		metrics.put("total_msg", (double) total_msg / nbr_recouvrement);
+		metrics.put("ancien", (double) ancien_ligne_recouvrement / nbr_recouvrement);
+		metrics.put("taille", (double) total_taille / nbCheckpoints);
+		return metrics;
 	}
 }

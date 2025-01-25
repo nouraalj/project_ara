@@ -1,0 +1,21 @@
+
+network.size 30
+simulation.endtime 1000000000
+random.seed 20
+
+protocol.transport UniformRandomTransport
+protocol.transport.mindelay 50 # gamma
+protocol.transport.maxdelay 50
+
+protocol.naimitrehel ara.projet.mutex.NaimiTrehelAlgo
+protocol.naimitrehel.transport transport
+protocol.naimitrehel.timeCS 50 # alpha
+protocol.naimitrehel.timeBetweenCS 5000 # beta
+
+control.statscollector ara.util.StatsCollector
+control.statscollector.at -1
+control.statscollector.FINAL
+control.statscollector.outputFile metrics.txt
+control.statscollector.proto naimitrehel
+control.statscollector.beta 5000
+control.statscollector.case case2

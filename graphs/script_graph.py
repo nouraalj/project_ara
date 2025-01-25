@@ -38,7 +38,7 @@ plt.grid(True)
 
 # Sauvegarde de l'image
 plt.tight_layout()
-plt.savefig("outputs/MessagesApplicatifsParCS.png")
+plt.savefig("outputs/Etude1/MessagesApplicatifsParCS.png")
 
 
 
@@ -74,7 +74,7 @@ plt.grid(True)
 
 # Ajuster la disposition et sauvegarder
 plt.tight_layout()
-plt.savefig("outputs/NombreRequestParNode.png")
+plt.savefig("outputs/Etude1/NombreRequestParNode.png")
 plt.close()
 
 
@@ -127,7 +127,7 @@ plt.grid(True)
 
 # Ajuster la disposition et sauvegarder
 plt.tight_layout()
-plt.savefig("outputs/TempsMoyenRequesting.png")
+plt.savefig("outputs/Etude1/TempsMoyenRequesting.png")
 plt.close()
 
 
@@ -178,4 +178,4 @@ for case in groupedbycase['Case'].unique():
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
 
-    plt.savefig(f"outputs/ProportionTokenStates_{case}.png")
+    plt.savefig(f"outputs/Etude1/ProportionTokenStates_{case}.png")

@@ -1,0 +1,36 @@
+
+network.size 30
+simulation.endtime 1000000
+random.seed 20
+
+
+protocol.transport UniformRandomTransport
+protocol.transport.mindelay 50 # gamma
+protocol.transport.maxdelay 50 # gamma
+
+protocol.fifotransport FIFOTransport
+protocol.fifotransport.transport transport
+
+protocol.juang JuangVenkatesanAlgo
+protocol.juang.transport fifotransport
+protocol.juang.checkpointable naimitrehel
+protocol.juang.timecheckpointing 400
+
+protocol.naimitrehel NaimiTrehelAlgoCheckpointable
+protocol.naimitrehel.transport juang
+protocol.naimitrehel.timeCS 50 #alpha
+protocol.naimitrehel.timeBetweenCS 3000 #beta
+
+control.crash CrashControler
+control.crash.from 10000
+control.crash.step 10000
+#control.crash.faulty_nodes 1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23_24_25_26_27_28_29_30
+control.crash.probacrash 0.0
+control.crash.checkpointer juang
+
+control.statscollector ara.util.StatsCollectorCheckpoint
+control.statscollector.at -1
+control.statscollector.FINAL
+control.statscollector.outputFile metrics
+control.statscollector.beta 3000
+control.statscollector.case case1

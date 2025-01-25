@@ -3,9 +3,9 @@ import subprocess
 import sys
 
 output_dirs = {
-    "case1": "./config/configs1",
-    "case2": "./config/configs2",
-    "case3": "./config/configs3",
+    "case1": "./config/study1/configs1",
+    "case2": "./config/study1/configs2",
+    "case3": "./config/study1/configs3",
 }
 metrics_file = "metrics.txt"
 
@@ -18,6 +18,10 @@ classpath = (
     "./peersim-1.0.5/jep-2.3.0.jar:./peersim-1.0.5/djep-1.0.0.jar"
 ) # à modifier selon le chemin vers les jar peerSim et les fichiers class
 
+
+# Nombre de noeuds pour notre système
+nodes = 30
+
 # Valeurs des paramètres pour chacun des cas étudiés
 cases = {
     "case1": {"gamma_min":1, "gamma_max":1, "alpha": 99},
@@ -27,6 +31,8 @@ cases = {
 beta_min = 1
 beta_max = 5000
 step = 200
+
+
 
 # Mise en place des directories pour la configuration
 for case, dir_path in output_dirs.items():
@@ -44,7 +50,7 @@ if os.path.exists(metrics_file):
 
 # Template du fichier de configuration
 template = """
-network.size 30
+network.size {nodes}
 simulation.endtime 1000000000
 random.seed 20
 
@@ -68,10 +74,11 @@ control.statscollector.case {case}
 
 # Generer les fichiers de config à partir du template
 for case, params in cases.items():
-    for beta in range(beta_min, beta_max + step, step):
-        #for beta in []:
+    #for beta in range(beta_min, beta_max + step, step):
+    for beta in [1, 5, 10, 30, 60, 100, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000]:
         dir_path = output_dirs[case]
         config_content = template.format(
+            nodes=nodes,
             gamma_min=params["gamma_min"],
             gamma_max=params["gamma_max"],
             alpha=params["alpha"],
